@@ -1,0 +1,495 @@
+openapi: 3.0.3
+info:
+  title: 'Laravel API Documentation'
+  description: ''
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost'
+tags:
+  -
+    name: Endpoints
+    description: ''
+paths:
+  /api/object:
+    get:
+      summary: ''
+      operationId: getApiObject
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+  /api/register:
+    post:
+      summary: ''
+      operationId: postApiRegister
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: zbailey@example.net
+                  nullable: false
+                password:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                c_password:
+                  type: string
+                  description: 'The value and <code>password</code> must match.'
+                  example: architecto
+                  nullable: false
+              required:
+                - name
+                - email
+                - password
+                - c_password
+      security: []
+  /api/login:
+    post:
+      summary: ''
+      operationId: postApiLogin
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /api/guest:
+    get:
+      summary: 'Display a listing of the all guests'
+      operationId: displayAListingOfTheAllGuests
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 'Store a newly created guest in storage.'
+      operationId: storeANewlyCreatedGuestInStorage
+      description: 'Parameters: guest_id, element_id, ballroom_id, parameters'
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                guest_id:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                ballroom_id:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                element_id:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+              required:
+                - guest_id
+                - ballroom_id
+                - element_id
+      security: []
+  '/api/guest/{id}':
+    get:
+      summary: 'Display the specified guest.'
+      operationId: displayTheSpecifiedGuest
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: 'Update the specified guest in storage.'
+      operationId: updateTheSpecifiedGuestInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                guest_id:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                balroom_id:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                element_id:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+              required:
+                - guest_id
+                - balroom_id
+                - element_id
+      security: []
+    delete:
+      summary: 'Remove the specified guest from storage.'
+      operationId: removeTheSpecifiedGuestFromStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the guest.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/element:
+    get:
+      summary: 'Display a listing of the elements.'
+      operationId: displayAListingOfTheElements
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 'Store a newly created element in storage.'
+      operationId: storeANewlyCreatedElementInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                type:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                ballroom_id:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                x:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                'y':
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                kind:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                spacing:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                status:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+              required:
+                - name
+                - type
+                - ballroom_id
+                - x
+                - 'y'
+                - kind
+                - spacing
+                - status
+      security: []
+  '/api/element/{id}':
+    get:
+      summary: 'Display the specified element.'
+      operationId: displayTheSpecifiedElement
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: 'Update the specified element in storage.'
+      operationId: updateTheSpecifiedElementInStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                type:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                ballroom_id:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                x:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                'y':
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                kind:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                spacing:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                status:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+              required:
+                - name
+                - type
+                - ballroom_id
+                - x
+                - 'y'
+                - kind
+                - spacing
+                - status
+      security: []
+    delete:
+      summary: 'Remove the specified element from storage.'
+      operationId: removeTheSpecifiedElementFromStorage
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the element.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/element/ballroomId/{ballroom_id}':
+    get:
+      summary: 'Display all gelements for specifig ballroom'
+      operationId: displayAllGelementsForSpecifigBallroom
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: ballroom_id
+        description: 'The ID of the ballroom.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/ballroom/{ballroom_id}':
+    get:
+      summary: 'Display the specified elements with guests for specific ballroom.'
+      operationId: displayTheSpecifiedElementsWithGuestsForSpecificBallroom
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: ballroom_id
+        description: 'The ID of the ballroom.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/user:
+    get:
+      summary: ''
+      operationId: getApiUser
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []

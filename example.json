@@ -1,0 +1,50 @@
+"data": [
+{
+"person": {
+"id": "3842b2f3-e5ce-11f0-9030-0050569974dc",
+"gender": "man",
+"name": "Piotr",
+"surname": "Szulc",
+"age_group": "adult",
+"age": 24,
+"group_name": "Pam młody"
+},
+"participation": {
+"id": "65b01a28-e5ce-11f0-9030-0050569974dc",
+"create_at": "2025-12-30T22:25:08+00:00"
+},
+"invitation": {
+"code": "MQ1SR4QO",
+"type_name": "Testowe"
+},
+"party_parts": [
+{
+"id": "873bd4e2-e55b-11f0-9030-0050569974dc",
+"name": "Ślub",
+"chosen_options": []
+},
+{
+"id": "8745bbc2-e55b-11f0-9030-0050569974dc",
+"name": "Przyjęcie weselne",
+"chosen_options": []
+}
+]
+},
+
+moje dane:
+
+return [
+'id' =>$this->id,
+'guest_id' => $this->guest_id,
+'name' => $this->name,
+'surname' => $this->surname,
+'element_id' => $this->element_id,
+'ballroom_id' => $this->ballroom_id,
+'gender' => $this->gender,
+'age_group' => $this->age_group,
+'menu' => $this->menu,
+'seated' => $this->seated,
+'group' => $this->group,
+'note' => $this->note,
+'parameters' => $this->parameters,
+];

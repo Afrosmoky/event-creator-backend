@@ -1,0 +1,2052 @@
+diff discountbusinesschecks.net/includes ibusinesschecks.com/includes
+Binary files discountbusinesschecks.net/includes/.DS_Store and ibusinesschecks.com/includes/.DS_Store differ
+diff discountbusinesschecks.net/includes/.htaccess ibusinesschecks.com/includes/.htaccess
+2c2
+< # @copyright Copyright 2003-2013 Zen Cart Development Team
+---
+> # @copyright Copyright 2003-2022 Zen Cart Development Team
+4c4
+< # @version GIT: $Id: Author: IronLady  Thu Aug 1 16:10:02 2013 +0100 Modified in v1.5.2 $
+---
+> # @version $Id: DrByte 2020 Oct 29 Modified in v1.5.8-alpha $
+22,23c22,28
+<   Order Allow,Deny
+<   Deny from all
+---
+>   <IfModule mod_authz_core.c>
+>     Require all denied
+>   </IfModule>
+>   <IfModule !mod_authz_core.c>
+>     Order Allow,Deny
+>     Deny from all
+>   </IfModule>
+27,29c32,39
+< <FilesMatch "(?i).*\.(js|css|html?|ico|jpe?g|gif|webp|png|swf|flv|xml|xsl|otf|ttf|woff|eot|svg)$">
+<   Order Allow,Deny
+<   Allow from all
+---
+> <FilesMatch "(?i).*\.(js|css|html?|jpe?g|gif|webp|png|otf|ico|cur|map|eot|svgz?|ttf|woff2?|xml|xsl)$">
+>   <IfModule mod_authz_core.c>
+>     Require all granted
+>   </IfModule>
+>   <IfModule !mod_authz_core.c>
+>     Order Allow,Deny
+>     Allow from all
+>   </IfModule>
+35,36c45,51
+< order deny,allow
+< deny from All
+---
+>   <IfModule mod_authz_core.c>
+>     Require all denied
+>   </IfModule>
+>   <IfModule !mod_authz_core.c>
+>     Order Allow,Deny
+>     Deny from all
+>   </IfModule>
+78d92
+<   ExpiresByType video/x-flv A604800
+83a98
+>   ExpiresByType image/svg A2592000
+diff discountbusinesschecks.net/includes/application_bottom.php ibusinesschecks.com/includes/application_bottom.php
+6,7c6
+<  * @package initSystem
+<  * @copyright Copyright 2003-2010 Zen Cart Development Team
+---
+>  * @copyright Copyright 2003-2022 Zen Cart Development Team
+10c9
+<  * @version $Id: application_bottom.php 17088 2010-07-31 05:08:33Z drbyte $
+---
+>  * @version $Id: lat9 2022 Jul 07 Modified in v1.5.8-alpha $
+13c12
+<   die('Illegal Access');
+---
+>     die('Illegal Access');
+14a14,38
+>
+> //  @todo icwtodo Development debug code
+> // do not remove for now
+> if (defined('DEV_SHOW_APPLICATION_BOTTOM_DEBUG') && DEV_SHOW_APPLICATION_BOTTOM_DEBUG == true) {
+>     $langLoaded = $languageLoader->getLanguageFilesLoaded();
+>     echo '$langLoaded = ' . str_replace("\n", '<br>', var_export($langLoaded, true));
+>
+>     $files = get_included_files();
+>     $langFiles = [];
+>     $pattern = DIR_WS_LANGUAGES;
+>     foreach ($files as $file) {
+>         $shortFile = str_replace(["\\", DIR_FS_CATALOG], ['/', ''], $file);
+>         if (in_array($shortFile, $langLoaded['legacy']) || in_array($file, $langLoaded['legacy'])) {
+>             continue;
+>         }
+>         if (in_array($shortFile, $langLoaded['arrays']) || in_array($file, $langLoaded['arrays'])) {
+>             continue;
+>         }
+>         if (strpos($shortFile, $pattern) === 0) {
+>             $langFiles[] = $file;
+>         }
+>     }
+>     echo '<br>Other $langFiles = ' . str_replace("\n", '<br>', var_export($langFiles, true));
+> }
+>
+17d40
+<
+Only in ibusinesschecks.com/includes: application_laravel.php
+diff discountbusinesschecks.net/includes/application_top.php ibusinesschecks.com/includes/application_top.php
+7,10c7,8
+<  * see {@link  http://www.zen-cart.com/wiki/index.php/Developers_API_Tutorials#InitSystem wikitutorials} for more details.
+<  *
+<  * @package initSystem
+<  * @copyright Copyright 2003-2013 Zen Cart Development Team
+---
+>  * see  {@link  https://docs.zen-cart.com/dev/code/init_system/} for more details.
+>  * @copyright Copyright 2003-2024 Zen Cart Development Team
+13c11
+<  * @version GIT: $Id: Author: Ian Wilson  Sun Dec 30 15:16:17 2012 +0000 Modified in v1.5.2 $
+---
+>  * @version $Id: lat9 2024 Sep 19 Modified in v2.1.0-beta1 $
+14a13,21
+>
+> use App\Models\PluginControl;
+> use App\Models\PluginControlVersion;
+> use Zencart\FileSystem\FileSystem;
+> use Zencart\PluginManager\PluginManager;
+> use Zencart\InitSystem\InitSystem;
+>
+> // Set session ID
+> $zenSessionId = 'zenid';
+18,35c25,52
+< $contaminated = (isset($_FILES['GLOBALS']) || isset($_REQUEST['GLOBALS'])) ? true : false;
+< $paramsToAvoid = array('GLOBALS', '_COOKIE', '_ENV', '_FILES', '_GET', '_POST', '_REQUEST', '_SERVER', '_SESSION', 'HTTP_COOKIE_VARS', 'HTTP_ENV_VARS', 'HTTP_GET_VARS', 'HTTP_POST_VARS', 'HTTP_POST_FILES', 'HTTP_RAW_POST_DATA', 'HTTP_SERVER_VARS', 'HTTP_SESSION_VARS');
+< $paramsToAvoid[] = 'autoLoadConfig';
+< $paramsToAvoid[] = 'mosConfig_absolute_path';
+< $paramsToAvoid[] = 'hash';
+< $paramsToAvoid[] = 'main';
+< foreach($paramsToAvoid as $key) {
+<   if (isset($_GET[$key]) || isset($_POST[$key]) || isset($_COOKIE[$key])) {
+<     $contaminated = true;
+<     break;
+<   }
+< }
+< $paramsToCheck = array('main_page', 'cPath', 'products_id', 'language', 'currency', 'action', 'manufacturers_id', 'pID', 'pid', 'reviews_id', 'filter_id', 'zenid', 'sort', 'number_of_uploads', 'notify', 'page_holder', 'chapter', 'alpha_filter_id', 'typefilter', 'disp_order', 'id', 'key', 'music_genre_id', 'record_company_id', 'set_session_login', 'faq_item', 'edit', 'delete', 'search_in_description', 'dfrom', 'pfrom', 'dto', 'pto', 'inc_subcat', 'payment_error', 'order', 'gv_no', 'pos', 'addr', 'error', 'count', 'error_message', 'info_message', 'cID', 'page', 'credit_class_error_code');
+< if (!$contaminated) {
+<   foreach($paramsToCheck as $key) {
+<     if (isset($_GET[$key]) && !is_array($_GET[$key])) {
+<       //var_dump($_GET[$key]);
+<       if (substr($_GET[$key], 0, 4) == 'http' || strstr($_GET[$key], '//')) {
+---
+> $contaminated = (isset($_FILES['GLOBALS']) || isset($_REQUEST['GLOBALS']));
+> $paramsToAvoid = [
+>     'GLOBALS',
+>     '_COOKIE',
+>     '_ENV',
+>     '_FILES',
+>     '_GET',
+>     '_POST',
+>     '_REQUEST',
+>     '_SERVER',
+>     '_SESSION',
+>     'HTTP_COOKIE_VARS',
+>     'HTTP_ENV_VARS',
+>     'HTTP_GET_VARS',
+>     'HTTP_POST_VARS',
+>     'HTTP_POST_FILES',
+>     'HTTP_RAW_POST_DATA',
+>     'HTTP_SERVER_VARS',
+>     'HTTP_SESSION_VARS',
+>     'autoLoadConfig',
+>     'mosConfig_absolute_path',
+>     'function',
+>     'hash',
+>     'main',
+>     'vars',
+> ];
+> foreach ($paramsToAvoid as $key) {
+>     if (isset($_GET[$key]) || isset($_POST[$key]) || isset($_COOKIE[$key])) {
+38,43d54
+<       }
+<       $len = (in_array($key, array('zenid', 'error_message', 'payment_error'))) ? 255 : 43;
+<       if (isset($_GET[$key]) && strlen($_GET[$key]) > $len) {
+<         $contaminated = true;
+<         break;
+<       }
+45d55
+<   }
+46a57,124
+> $paramsToCheck = [
+>     $zenSessionId,
+>     'main_page',
+>     'cPath',
+>     'products_id',
+>     'language',
+>     'currency',
+>     'action',
+>     'manufacturers_id',
+>     'pID',
+>     'pid',
+>     'reviews_id',
+>     'filter_id',
+>     'sort',
+>     'number_of_uploads',
+>     'notify',
+>     'page_holder',
+>     'chapter',
+>     'alpha_filter_id',
+>     'typefilter',
+>     'disp_order',
+>     'id',
+>     'key',
+>     'music_genre_id',
+>     'record_company_id',
+>     'set_session_login',
+>     'faq_item',
+>     'edit',
+>     'delete',
+>     'search_in_description',
+>     'dfrom',
+>     'pfrom',
+>     'dto',
+>     'pto',
+>     'inc_subcat',
+>     'payment_error',
+>     'order',
+>     'gv_no',
+>     'pos',
+>     'addr',
+>     'error',
+>     'count',
+>     'error_message',
+>     'info_message',
+>     'cID',
+>     'page',
+>     'credit_class_error_code',
+> ];
+> if (!$contaminated) {
+>     foreach ($paramsToCheck as $key) {
+>         if (!isset($_GET[$key])) {
+>             continue;
+>         }
+>         if (is_array($_GET[$key])) {
+>             $contaminated = true;
+>             break;
+>         }
+>         if (str_starts_with(strtolower($_GET[$key]), 'http') || str_contains($_GET[$key], '//')) {
+>             $contaminated = true;
+>             break;
+>         }
+>         $len = (in_array($key, [$zenSessionId, 'error_message', 'payment_error'])) ? 255 : 43;
+>         if (strlen($_GET[$key]) > $len) {
+>             $contaminated = true;
+>             break;
+>         }
+>     }
+> }
+48,51c126,128
+< if ($contaminated)
+< {
+<   header('HTTP/1.1 406 Not Acceptable');
+<   exit(0);
+---
+> if ($contaminated) {
+>     header('HTTP/1.1 406 Not Acceptable');
+>     exit(0);
+54c131,137
+< /* *** END OF INNOCULATION *** */
+---
+> /* *** END OF INOCULATION *** */
+>
+> // if session id is reconfigured, then we want to exclude its use immediately
+> if ($zenSessionId !== 'zenid') {
+>     unset($_GET['zenid'], $_GET['amp;zenid'], $_REQUEST['zenid']);
+> }
+>
+58a142
+>
+63,65c147,149
+< //  define('DISPLAY_PAGE_PARSE_TIME', 'true');
+< @ini_set("arg_separator.output","&");
+< @ini_set("html_errors","0");
+---
+> @ini_set('arg_separator.output', '&');
+> @ini_set('html_errors', '0');
+>
+66a151,160
+>  * Ensure minimum PHP version.
+>  * This is intended to run before any dependencies are required
+>  * See https://www.zen-cart.com/requirements or run zc_install to see actual requirements!
+>  */
+> if (PHP_VERSION_ID < 80002) {
+>     require 'includes/templates/template_default/templates/tpl_zc_phpupgrade_default.php';
+>     exit(0);
+> }
+>
+> /**
+70,73c164,167
+<   /**
+<    * load any local(user created) configure file.
+<    */
+<   include('includes/local/configure.php');
+---
+>     /**
+>      * load any local(user created) configure file.
+>      */
+>     include 'includes/local/configure.php';
+74a169
+>
+78a174
+>
+82,83c178,179
+<  * Note STRICT_ERROR_REPORTING should never be set to true on a production site. <br />
+<  * It is mainly there to show php warnings during testing/bug fixing phases.<br />
+---
+>  * Note STRICT_ERROR_REPORTING should never be set to true on a production site.
+>  * It is mainly there to show php warnings during testing/bug fixing phases.
+85,89c181,183
+< if (defined('STRICT_ERROR_REPORTING') && STRICT_ERROR_REPORTING === true) {
+<     @ini_set('display_errors', '1'); // show errors on screen in strict mode
+<     // In PHP 8: E_STRICT is gone. E_DEPRECATED exists; E_ALL includes it starting 8.1.
+<     // This works fine across 8.0+ (and earlier).
+<     error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+---
+> if (DEBUG_AUTOLOAD || (defined('STRICT_ERROR_REPORTING') && STRICT_ERROR_REPORTING == true)) {
+>     @ini_set('display_errors', true);
+>     error_reporting(defined('STRICT_ERROR_REPORTING_LEVEL') ? STRICT_ERROR_REPORTING_LEVEL : E_ALL);
+91d184
+<     @ini_set('display_errors', '0'); // hide errors in non-strict mode
+94a188,189
+> date_default_timezone_set(date_default_timezone_get());
+>
+96c191,192
+<  * turn off magic-quotes support, for both runtime and sybase, as both will cause problems if enabled
+---
+>  * Check for a valid system locale, and override if invalid or set to 'C' which means 'unconfigured'
+>  * It will be overridden later via language-selection operations anyway, but a valid default must be set for zcDate class methods to work
+98,105c194,196
+< if (version_compare(PHP_VERSION, 5.3, '<') && function_exists('set_magic_quotes_runtime')) set_magic_quotes_runtime(0);
+< if (version_compare(PHP_VERSION, 5.4, '<') && @ini_get('magic_quotes_sybase') != 0) @ini_set('magic_quotes_sybase', 0);
+< /*
+<  * Get time zone info from PHP config
+<  */
+< if (version_compare(PHP_VERSION, 5.3, '>='))
+< {
+<   @date_default_timezone_set(date_default_timezone_get());
+---
+> $detected_locale = setlocale(LC_TIME, 0);
+> if ($detected_locale === false || $detected_locale === 'C') {
+>     setlocale(LC_TIME, ['en_US', 'en_US.UTF-8', 'en-US', 'en']);
+106a198,202
+>
+> if (file_exists('./not_for_release/testFramework/Support/application_testing.php')) {
+>     require './not_for_release/testFramework/Support/application_testing.php';
+> }
+>
+110,118c206,216
+< if (file_exists('includes/configure.php')) {
+<   /**
+<    * load the main configure file.
+<    */
+<   include('includes/configure.php');
+< } else if (!defined('DIR_FS_CATALOG') && !defined('HTTP_SERVER') && !defined('DIR_WS_CATALOG') && !defined('DIR_WS_INCLUDES')) {
+<   $problemString = 'includes/configure.php not found';
+<   require('includes/templates/template_default/templates/tpl_zc_install_suggested_default.php');
+<   exit;
+---
+> if (!defined('ZENCART_TESTFRAMEWORK_RUNNING')) {
+>     if (file_exists('includes/configure.php')) {
+>         /**
+>          * load the main configure file.
+>          */
+>         include 'includes/configure.php';
+>     } elseif (!defined('DIR_FS_CATALOG') && !defined('HTTP_SERVER') && !defined('DIR_WS_CATALOG') && !defined('DIR_WS_INCLUDES')) {
+>         $problemString = 'includes/configure.php not found';
+>         require 'includes/templates/template_default/templates/tpl_zc_install_suggested_default.php';
+>         exit;
+>     }
+119a218
+>
+124,126c223,225
+<   $problemString = 'includes/configure.php file contents invalid.  ie: DIR_FS_CATALOG not valid or not set';
+<   require('includes/templates/template_default/templates/tpl_zc_install_suggested_default.php');
+<   exit;
+---
+>     $problemString = 'includes/configure.php file contents invalid.  ie: DIR_FS_CATALOG not valid or not set';
+>     require 'includes/templates/template_default/templates/tpl_zc_install_suggested_default.php';
+>     exit;
+129d227
+<
+131c229
+<  * include the list of extra configure files
+---
+>  * check for and load system defined path constants
+133,147c231,235
+< if ($za_dir = @dir(DIR_WS_INCLUDES . 'extra_configures')) {
+<   while ($zv_file = $za_dir->read()) {
+<     if (preg_match('~^[^\._].*\.php$~i', $zv_file) > 0) {
+<       /**
+<        * load any user/contribution specific configuration files.
+<        */
+<       include(DIR_WS_INCLUDES . 'extra_configures/' . $zv_file);
+<     }
+<   }
+<   $za_dir->close();
+<   unset($za_dir);
+< }
+< $autoLoadConfig = array();
+< if (isset($loaderPrefix)) {
+<  $loaderPrefix = preg_replace('/[^a-z_]/', '', $loaderPrefix);
+---
+> if (file_exists('includes/defined_paths.php')) {
+>     /**
+>      * load the system-defined path constants
+>      */
+>     require 'includes/defined_paths.php';
+149,177c237,238
+<   $loaderPrefix = 'config';
+< }<?php
+< /**
+<  * application_top.php Common actions carried out at the start of each page invocation.
+<  *
+<  * Initializes common classes & methods. Controlled by an array which describes
+<  * the elements to be initialised and the order in which that happens.
+<  * see {@link  http://www.zen-cart.com/wiki/index.php/Developers_API_Tutorials#InitSystem wikitutorials} for more details.
+<  *
+<  * @package initSystem
+<  * @copyright Copyright 2003-2013 Zen Cart Development Team
+<  * @copyright Portions Copyright 2003 osCommerce
+<  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
+<  * @version GIT: $Id: Author: Ian Wilson  Sun Dec 30 15:16:17 2012 +0000 Modified in v1.5.2 $
+<  */
+< /**
+<  * inoculate against hack attempts which waste CPU cycles
+<  */
+< $contaminated = (isset($_FILES['GLOBALS']) || isset($_REQUEST['GLOBALS'])) ? true : false;
+< $paramsToAvoid = array('GLOBALS', '_COOKIE', '_ENV', '_FILES', '_GET', '_POST', '_REQUEST', '_SERVER', '_SESSION', 'HTTP_COOKIE_VARS', 'HTTP_ENV_VARS', 'HTTP_GET_VARS', 'HTTP_POST_VARS', 'HTTP_POST_FILES', 'HTTP_RAW_POST_DATA', 'HTTP_SERVER_VARS', 'HTTP_SESSION_VARS');
+< $paramsToAvoid[] = 'autoLoadConfig';
+< $paramsToAvoid[] = 'mosConfig_absolute_path';
+< $paramsToAvoid[] = 'hash';
+< $paramsToAvoid[] = 'main';
+< foreach($paramsToAvoid as $key) {
+<   if (isset($_GET[$key]) || isset($_POST[$key]) || isset($_COOKIE[$key])) {
+<     $contaminated = true;
+<     break;
+<   }
+---
+>     die('ERROR: /includes/defined_paths.php file not found. Cannot continue.');
+>     exit;
+180,197c241,242
+<
+<
+< $paramsToCheck = array('main_page', 'cPath', 'products_id', 'language', 'currency', 'action', 'manufacturers_id', 'pID', 'pid', 'reviews_id', 'filter_id', 'zenid', 'sort', 'number_of_uploads', 'notify', 'page_holder', 'chapter', 'alpha_filter_id', 'typefilter', 'disp_order', 'id', 'key', 'music_genre_id', 'record_company_id', 'set_session_login', 'faq_item', 'edit', 'delete', 'search_in_description', 'dfrom', 'pfrom', 'dto', 'pto', 'inc_subcat', 'payment_error', 'order', 'gv_no', 'pos', 'addr', 'error', 'count', 'error_message', 'info_message', 'cID', 'page', 'credit_class_error_code');
+< if (!$contaminated) {
+<   foreach($paramsToCheck as $key) {
+<     if (isset($_GET[$key]) && !is_array($_GET[$key])) {
+<       //var_dump($_GET[$key]);
+<       if (substr($_GET[$key], 0, 4) == 'http' || strstr($_GET[$key], '//')) {
+<         $contaminated = true;
+<         break;
+<       }
+<       $len = (in_array($key, array('zenid', 'error_message', 'payment_error'))) ? 255 : 43;
+<       if (isset($_GET[$key]) && strlen($_GET[$key]) > $len) {
+<         $contaminated = true;
+<         break;
+<       }
+<     }
+<   }
+---
+> if (file_exists($file = DIR_FS_CATALOG . 'laravel/vendor/symfony/polyfill-mbstring/bootstrap80.php')) {
+>     include $file;
+198a244,245
+> require DIR_FS_CATALOG . DIR_WS_FUNCTIONS . 'php_polyfills.php';
+> require DIR_FS_CATALOG . DIR_WS_FUNCTIONS . 'zen_define_default.php';
+200,208d246
+<
+< unset($paramsToCheck, $paramsToAvoid, $key);
+< if ($contaminated)
+< {
+<   header('HTTP/1.1 406 Not Acceptable');
+<   exit(0);
+< }
+< unset($contaminated, $len);
+< /* *** END OF INNOCULATION *** */
+210c248
+<  * boolean used to see if we are in the admin script, obviously set to false here.
+---
+>  * Register error-handling functions
+212,228c250,251
+< define('IS_ADMIN_FLAG', false);
+< /**
+<  * integer saves the time at which the script started.
+<  */
+< define('PAGE_PARSE_START_TIME', microtime());
+< //  define('DISPLAY_PAGE_PARSE_TIME', 'true');
+< @ini_set("arg_separator.output","&");
+< @ini_set("html_errors","0");
+< /**
+<  * Set the local configuration parameters - mainly for developers
+<  */
+< if (file_exists('includes/local/configure.php')) {
+<   /**
+<    * load any local(user created) configure file.
+<    */
+<   include('includes/local/configure.php');
+< }
+---
+> require DIR_FS_CATALOG . DIR_WS_FUNCTIONS . 'functions_error_handling.php';
+> zen_enable_error_logging();
+230d252
+<
+232c254
+<  * boolean if true the autoloader scripts will be parsed and their output shown. For debugging purposes only.
+---
+>  * include the list of extra configure files
+234,259c256,257
+< define('DEBUG_AUTOLOAD', false);
+< /**
+<  * set the level of error reporting
+<  *
+<  * Note STRICT_ERROR_REPORTING should never be set to true on a production site. <br />
+<  * It is mainly there to show php warnings during testing/bug fixing phases.<br />
+<  */
+<
+< /*
+<  * turn off magic-quotes support, for both runtime and sybase, as both will cause problems if enabled
+<  */
+< /**
+<  * check for and include load application parameters
+<  */
+< if (file_exists('includes/configure.php')) {
+<   /**
+<    * load the main configure file.
+<    */
+<   include('includes/configure.php');
+<
+<
+<
+< } else if (!defined('DIR_FS_CATALOG') && !defined('HTTP_SERVER') && !defined('DIR_WS_CATALOG') && !defined('DIR_WS_INCLUDES')) {
+<   $problemString = 'includes/configure.php not found';
+<   require('includes/templates/template_default/templates/tpl_zc_install_suggested_default.php');
+<   exit;
+---
+> foreach (glob(DIR_WS_INCLUDES . 'extra_configures/*.php') ?? [] as $file) {
+>     include($file);
+262d259
+<
+264c261
+<  * if main configure file doesn't contain valid info (ie: is dummy or doesn't match filestructure, display assistance page to suggest running the installer)
+---
+>  * determine install status
+266,282c263,273
+< // if (!defined('DIR_FS_CATALOG') || !is_dir(DIR_FS_CATALOG.'/includes/classes')) {
+< //   $problemString = 'includes/configure.php file contents invalid.  ie: DIR_FS_CATALOG not valid or not set';
+< //   require('includes/templates/template_default/templates/tpl_zc_install_suggested_default.php');
+<
+< // }
+<
+<
+< /**
+<  * include the list of extra configure files
+<  */
+< if ($za_dir = @dir(DIR_WS_INCLUDES . 'extra_configures')) {
+<   while ($zv_file = $za_dir->read()) {
+<     if (preg_match('~^[^\._].*\.php$~i', $zv_file) > 0) {
+<       /**
+<        * load any user/contribution specific configuration files.
+<        */
+<       include(DIR_WS_INCLUDES . 'extra_configures/' . $zv_file);
+---
+> if (!defined('ZENCART_TESTFRAMEWORK_RUNNING')) {
+>     if (
+>         (!file_exists('includes/configure.php') && !file_exists('includes/local/configure.php'))
+>         || DB_TYPE == ''
+>         || !file_exists('includes/classes/db/' . DB_TYPE . '/query_factory.php')
+>         || !file_exists('includes/autoload_func.php')
+>     ) {
+>         $problemString = 'includes/configure.php file empty or file not found, OR wrong DB_TYPE set, OR cannot find includes/autoload_func.php which suggests paths are wrong or files were not uploaded correctly';
+>         require 'includes/templates/template_default/templates/tpl_zc_install_suggested_default.php';
+>         header('location: zc_install/index.php');
+>         exit;
+284,286d274
+<   }
+<   $za_dir->close();
+<   unset($za_dir);
+289,299d276
+<
+< $autoLoadConfig = array();
+< if (isset($loaderPrefix)) {
+<  $loaderPrefix = preg_replace('/[^a-z_]/', '', $loaderPrefix);
+< } else {
+<   $loaderPrefix = 'config';
+< }
+< $loader_file = $loaderPrefix . '.core.php';
+< require('includes/initsystem.php');
+<
+<
+301c278
+<  * determine install status
+---
+>  * psr-4 autoloading
+303,308c280,286
+< if (( (!file_exists('includes/configure.php') && !file_exists('includes/local/configure.php')) ) || (DB_TYPE == '') || (!file_exists('../_CDN/includes_fe/classes/db/' .DB_TYPE . '/query_factory.php')) || !file_exists('includes/autoload_func.php')) {
+<   $problemString = 'includes/configure.php file empty or file not found, OR wrong DB_TYPE set, OR cannot find includes/autoload_func.php which suggests paths are wrong or files were not uploaded correctly';
+<   require('templates/template_default/templates/tpl_zc_install_suggested_default.php');
+<   header('location: zc_install/index.php');
+<   exit;
+< }
+---
+> require DIR_FS_CATALOG . DIR_WS_CLASSES . 'vendors/AuraAutoload/src/Loader.php';
+> require DIR_FS_CATALOG . 'laravel/vendor/autoload.php';
+> $psr4Autoloader = new \Aura\Autoload\Loader;
+> $psr4Autoloader->register();
+> require('includes/psr4Autoload.php');
+> require DIR_FS_CATALOG . DIR_WS_CLASSES . 'class.base.php';
+> require DIR_FS_CATALOG . DIR_WS_CLASSES . 'query_cache.php';
+309a288,290
+> $queryCache = new QueryCache();
+> require DIR_FS_CATALOG . DIR_WS_CLASSES . 'cache.php';
+> $zc_cache = new cache();
+311,313c292,293
+< /**
+<  * load the autoloader interpreter code.
+< */
+---
+> require 'includes/init_includes/init_file_db_names.php';
+> require 'includes/init_includes/init_database.php';
+315c295
+< require('includes/autoload_func.php');
+---
+> require DIR_FS_CATALOG . 'includes/application_laravel.php';
+317c297,298
+< //comment today -15/aug/2025
+---
+> $pluginManager = new PluginManager(new PluginControl(), new \App\Models\PluginControlVersion());
+> $installedPlugins = $pluginManager->getInstalledPlugins();
+318a300,302
+> $fs = new FileSystem;
+> $fs->loadFilesFromPluginsDirectory($installedPlugins, 'catalog/includes/extra_configures', '~^[^\._].*\.php$~i');
+> $fs->loadFilesFromPluginsDirectory($installedPlugins, 'catalog/includes/extra_datafiles', '~^[^\._].*\.php$~i');
+320,334c304,311
+<
+< /**
+<  * load the counter code
+< **/
+< // if ($spider_flag == false) {
+< // // counter and counter history
+< //   require(DIR_WS_INCLUDES . 'counter.php');
+< // }
+< //comment today -15/aug/2025
+<
+<
+< // get customers unique IP that paypal does not touch
+< $customers_ip_address = $_SERVER['REMOTE_ADDR'];
+< if (!isset($_SESSION['customers_ip_address'])) {
+<   $_SESSION['customers_ip_address'] = $customers_ip_address;
+---
+> foreach ($installedPlugins as $plugin) {
+>     $namespaceAdmin = 'Zencart\\Plugins\\Admin\\' . ucfirst($plugin['unique_key']);
+>     $namespaceCatalog = 'Zencart\\Plugins\\Catalog\\' . ucfirst($plugin['unique_key']);
+>     $filePath = DIR_FS_CATALOG . 'zc_plugins/' . $plugin['unique_key'] . '/' . $plugin['version'] . '/';
+>     $filePathAdmin = $filePath . 'admin/includes/classes/';
+>     $filePathCatalog = $filePath . 'catalog/includes/classes/';
+>     $psr4Autoloader->addPrefix($namespaceAdmin, $filePathAdmin);
+>     $psr4Autoloader->addPrefix($namespaceCatalog, $filePathCatalog);
+337,374c314,317
+<
+<
+< if (!function_exists('z_expand_meta')) {
+<     function z_expand_meta($raw) {
+<         if (!is_string($raw)) $raw = (string)($raw ?? '');
+<
+<         // In case DB stored &lt;?= ... ?&gt;, decode first
+<         $raw = html_entity_decode($raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+<
+<         $raw = preg_replace_callback(
+<             '/<\?(?:php)?\s*=\s*([A-Z_][A-Z0-9_]*)\s*\?>|<\?php\s+echo\s+([A-Z_][A-Z0-9_]*)\s*;?\s*\?>/i',
+<             function ($m) {
+<                 $name = $m[1] ?: $m[2];
+<                 return defined($name) ? constant($name) : '';
+<             },
+<             $raw
+<         );
+<
+<         // Token-style placeholders
+<         $tokens = [
+<             '{HEADING_TITLE}' => defined('HEADING_TITLE') ? HEADING_TITLE : '',
+<             '{STORE_NAME}'    => defined('STORE_NAME') ? STORE_NAME : '',
+<             '{YEAR}'          => date('Y'),
+<         ];
+<         $raw = strtr($raw, $tokens);
+<
+<         // Whitelisted bare constants
+<         $allowed = ['HEADING_TITLE','STORE_NAME'];
+<         $pattern = '/\b(' . implode('|', array_map('preg_quote', $allowed)) . ')\b/';
+<         $raw = preg_replace_callback($pattern, function($m){
+<             return defined($m[1]) ? constant($m[1]) : '';
+<         }, $raw);
+<
+<         // Strip remaining PHP blocks
+<         $raw = preg_replace('/<\?(?:php|=).*?\?>/is', '', $raw);
+<
+<         return trim(preg_replace('/\s+/', ' ', $raw));
+<     }
+---
+> if (isset($loaderPrefix)) {
+>     $loaderPrefix = preg_replace('/[^a-z_]/', '', $loaderPrefix);
+> } else {
+>     $loaderPrefix = 'config';
+375a319
+> $initSystem = new InitSystem('catalog', $loaderPrefix, new FileSystem, $pluginManager, $installedPlugins);
+377,388c321,322
+<
+<
+< $loader_file = $loaderPrefix . '.core.php';
+< require('includes/initsystem.php');
+< /**
+<  * determine install status
+<  */
+< if (( (!file_exists('includes/configure.php') && !file_exists('includes/local/configure.php')) ) || (DB_TYPE == '') || (!file_exists('includes/classes/db/' .DB_TYPE . '/query_factory.php')) || !file_exists('includes/autoload_func.php')) {
+<   $problemString = 'includes/configure.php file empty or file not found, OR wrong DB_TYPE set, OR cannot find includes/autoload_func.php which suggests paths are wrong or files were not uploaded correctly';
+<   require('includes/templates/template_default/templates/tpl_zc_install_suggested_default.php');
+<   header('location: zc_install/index.php');
+<   exit;
+---
+> if (defined('DEBUG_AUTOLOAD') && DEBUG_AUTOLOAD == true) {
+>     $initSystem->setDebug(true);
+390,393d323
+< /**
+<  * load the autoloader interpreter code.
+< */
+< require('includes/autoload_func.php');
+394a325
+> $loaderList = $initSystem->loadAutoLoaders();
+395a327
+> $initSystemList = $initSystem->processLoaderList($loaderList);
+396a329,330
+> require DIR_FS_CATALOG . 'includes/autoload_func.php';
+>
+400,402c334,336
+< if ($spider_flag == false) {
+< // counter and counter history
+<   require('counter.php');
+---
+> if (empty($spider_flag)) {
+>     // counter and counter history
+>     require DIR_WS_INCLUDES . 'counter.php';
+403a338
+>
+407c342
+<   $_SESSION['customers_ip_address'] = $customers_ip_address;
+---
+>     $_SESSION['customers_ip_address'] = $customers_ip_address;
+409,413d343
+<
+<
+<
+<
+<
+Common subdirectories: discountbusinesschecks.net/includes/auto_loaders and ibusinesschecks.com/includes/auto_loaders
+diff discountbusinesschecks.net/includes/autoload_func.php ibusinesschecks.com/includes/autoload_func.php
+4,7d3
+<  *
+<  * The autoloader loop takes the array from the auto_loaders directory
+<  * and uses this this to constuct the InitSysytem.
+<  * see {@link http://www.zen-cart.com/wiki/index.php/Developers_API_Tutorials#InitSystem} for more details.
+9,10c5,8
+<  * @package initSystem
+<  * @copyright Copyright 2003-2009 Zen Cart Development Team
+---
+>  * The autoloader loop takes the array from the auto_loaders directory
+>  * and uses it to construct the InitSystem.
+>  * see  {@link  https://docs.zen-cart.com/dev/code/init_system/} for more details.
+>  * @copyright Copyright 2003-2022 Zen Cart Development Team
+13c11
+<  * @version $Id: autoload_func.php 14141 2009-08-10 19:34:47Z wilt $
+---
+>  * @version $Id: Scott C Wilson 2022 Jul 05 Modified in v1.5.8-alpha $
+15,17d12
+<
+<  error_log('CEON AUTOLDR (domain) HIT: '.__FILE__);
+<
+21,31c16,21
+< reset($autoLoadConfig);
+< ksort($autoLoadConfig);
+< foreach ($autoLoadConfig as $actionPoint => $row) {
+<   $debugOutput = "";
+<   foreach($row as $entry) {
+<     $debugOutput = 'actionPoint=>'.$actionPoint . ' ';
+< //    $entry['loadFile'] = str_replace(array(':', '\\\\'), '', $entry['loadFile']);
+<
+< if (!empty($entry['autoType']) && $entry['autoType'] === 'class') {
+<   $p = (isset($entry['classPath']) ? $entry['classPath'] : DIR_WS_CLASSES) . $entry['loadFile'];
+<   error_log('AUTOLOAD class include attempt: ' . $p . ' exists? ' . (file_exists($p) ? 'YES' : 'NO'));
+---
+> $debugAutoload = false;
+> if (defined('DEBUG_AUTOLOAD') && DEBUG_AUTOLOAD == true) $debugAutoload = true;
+> if ($debugAutoload) {
+>     echo '<pre>$initSystemList=<br>';
+>     print_r($initSystemList);
+>     echo '</pre>';
+33,103c23,66
+<
+<     switch($entry['autoType']) {
+<       case 'include':
+<       /**
+<        * include a file as specified by autoloader array
+<        */
+<       if (file_exists($entry['loadFile'])) include($entry['loadFile']); else $debugOutput .= 'FAILED: ';
+<       $debugOutput .= 'include(\'' . $entry['loadFile'] . '\');' . '<br />';
+<       break;
+<       case 'require':
+<       /**
+<        * require a file as specified by autoloader array
+<        */
+<       if (file_exists($entry['loadFile'])) require($entry['loadFile']); else $debugOutput .= 'FAILED: ';
+<       $debugOutput .= 'require(\'' . $entry['loadFile'] . '\');' . '<br />';
+<       break;
+<       case 'init_script':
+<       $baseDir = DIR_WS_INCLUDES . 'init_includes/';
+<       if (file_exists(DIR_WS_INCLUDES . 'init_includes/overrides/' . $entry['loadFile'])) {
+<         $baseDir = DIR_WS_INCLUDES . 'init_includes/overrides/';
+<       }
+<       /**
+<        * include an init_script as specified by autoloader array
+<        */
+<       require($baseDir . $entry['loadFile']);
+<       $debugOutput .= 'require(\'' . $baseDir . $entry['loadFile'] . '\');' . '<br />';
+<       break;
+<       case 'class':
+<       if (isset($entry['classPath'])) {
+<         $classPath = $entry['classPath'];
+<       } else {
+< //         $classPath = DIR_FS_CATALOG . DIR_WS_CLASSES;
+<         $classPath = DIR_WS_CLASSES;
+<       }
+<       /**
+<        * include a class definition as specified by autoloader array
+<        */
+<       if (file_exists($classPath . $entry['loadFile'])) include($classPath . $entry['loadFile']); else $debugOutput .= 'FAILED: ';
+<       $debugOutput .= 'include(\'' . $classPath . $entry['loadFile'] . '\');' . '<br />';
+<       break;
+<       case 'classInstantiate':
+<       $objectName = $entry['objectName'];
+<       $className = $entry['className'];
+<       if (isset($entry['classSession']) && $entry['classSession'] === true) {
+<         if (isset($entry['checkInstantiated']) && $entry['checkInstantiated'] === true) {
+<           if (!isset($_SESSION[$objectName])) {
+<             $_SESSION[$objectName] = new $className();
+<             $debugOutput .= 'if (!$_SESSION[' . $objectName . ']) { ';
+<             $debugOutput .= '$_SESSION[' . $objectName . '] = new ' . $className . '();';
+<             $debugOutput .= ' }<br />';
+<           }
+<         } else {
+<           $_SESSION[$objectName] = new $className();
+<           $debugOutput .= '  $_SESSION[' . $objectName . '] = new ' . $className . '();<br />';
+<         }
+<       } else {
+<         $$objectName = new $className();
+<         $debugOutput .= '$' . $objectName . ' = new ' . $className . '();<br />';
+<       }
+<       break;
+<       case 'objectMethod':
+<       $objectName = $entry['objectName'];
+<       $methodName = $entry['methodName'];
+<       if (is_object($_SESSION[$objectName])) {
+<         $_SESSION[$objectName]->$methodName();
+<         $debugOutput .= '$_SESSION[' . $objectName . ']->' . $methodName . '();<br />';
+<       } else {
+<         $$objectName->$methodName();
+<         $debugOutput .= '$' . $objectName . '->' . $methodName . '();<br />';
+<       }
+<       break;
+---
+> foreach ($initSystemList as $entry) {
+>     switch ($entry['type']) {
+>         case 'include':
+>             if ($entry['forceLoad']) {
+>                 if ($debugAutoload) echo 'case "include": ' . $entry['filePath'] . "<br>\n";
+>                 include $entry['filePath'];
+>             } else {
+>                 if ($debugAutoload) echo 'case "include_once": ' . $entry['filePath'] . "<br>\n";
+>                 include_once $entry['filePath'];
+>             }
+>             break;
+>         case 'require':
+>             if ($entry['forceLoad']) {
+>                 if ($debugAutoload) echo 'case "require": ' . $entry['filePath'] . "<br>\n";
+>                 require $entry['filePath'];
+>             } else {
+>                 if ($debugAutoload) echo 'case "require_once": ' . $entry['filePath'] . "<br>\n";
+>                 require_once $entry['filePath'];
+>             }
+>             break;
+>         case 'class':
+>             if ($debugAutoload) echo 'case "class": ' . $entry['class'] . "<br>\n";
+>             $objectName = $entry['object'];
+>             $className = $entry['class'];
+>             $$objectName = new $className();
+>             break;
+>         case 'sessionClass':
+>             if ($debugAutoload) echo 'case "sessionClass": ' . $entry['class'] . "<br>\n";
+>             $objectName = $entry['object'];
+>             $className = $entry['class'];
+>             if (!$entry['checkInstantiated'] || !isset($_SESSION[$objectName])) {
+>                 $_SESSION[$objectName] = new $className();
+>             }
+>             break;
+>         case 'objectMethod':
+>             if ($debugAutoload) echo 'case "objectMethod": ' . '$entry[\'method\']=' . $entry['method'] . ', $entry[\'object\']=' . $entry['object'] . "<br>\n";
+>             $objectName = $entry['object'];
+>             $methodName = $entry['method'];
+>               if (isset($_SESSION[$objectName]) && is_object($_SESSION[$objectName])) {
+>                   $_SESSION[$objectName]->$methodName();
+>               } else {
+>                   ${$objectName}->$methodName();
+>               }
+>             break;
+105d67
+<   }
+Common subdirectories: discountbusinesschecks.net/includes/classes and ibusinesschecks.com/includes/classes
+Only in discountbusinesschecks.net/includes: configure(checks.net old).php
+diff discountbusinesschecks.net/includes/configure.php ibusinesschecks.com/includes/configure.php
+3,4c3
+<  * @package Configuration Settings circa 1.5.4
+<  * @copyright Copyright 2003-2014 Zen Cart Development Team
+---
+>  * @copyright Copyright 2003-2024 Zen Cart Development Team
+7c6
+<  * File Built by zc_install on 2015-06-17 05:53:48
+---
+>  * File Built by Zen Cart Installer on Sat Dec 27 2025 22:00:09
+9a9,10
+> /*************** NOTE: This file is VERY similar to, but DIFFERENT from the "admin" version of configure.php. ***********/
+> /***************       The 2 files should be kept separate and not used to overwrite each other.              ***********/
+11,12c12,17
+< /*************** NOTE: This file is similar, but DIFFERENT from the "admin" version of configure.php. ***********/
+< /************* The 2 files should be kept separate and not used to overwrite each other.      ***********/
+---
+> /**
+>  * Enter the domain for your store
+>  * If you have SSL, enter the correct https address in BOTH the HTTP_SERVER and HTTPS_SERVER settings, instead of just an http address.
+>  */
+> define('HTTP_SERVER', 'http://localhost:8888');
+> define('HTTPS_SERVER', 'https://localhost:8888');
+14,24c19,22
+< // Define the webserver and path parameters
+<   // HTTP_SERVER is your Main webserver: eg-http://www.your_domain.com
+<   // HTTPS_SERVER is your Secure webserver: eg-https://www.your_domain.com
+<  // define('STRICT_ERROR_REPORTING', true);
+<   if(isset($_SERVER['HTTPS'])){
+<       $protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
+<   }
+<   else{
+<       $protocol = 'http';
+<   }
+<   $new_store_domain = str_replace('www.', '', $_SERVER['SERVER_NAME']);
+---
+> /**
+>  * If you have https enabled on your website, set this to 'true'
+>  */
+> define('ENABLE_SSL', 'false');
+26,27c24,30
+<   define('HTTP_SERVER', $protocol.'://'.$_SERVER['SERVER_NAME']);
+<   define('HTTPS_SERVER', $protocol.'://'.$_SERVER['SERVER_NAME']);
+---
+> /**
+>  * These DIR_WS_xxxx values refer to the name of any subdirectory in which your store is located.
+>  * These values get added to the HTTP_CATALOG_SERVER and HTTPS_CATALOG_SERVER values to form the complete URLs to your storefront.
+>  * They should always start and end with a slash ... ie: '/' or '/foldername/'
+>  */
+> define('DIR_WS_CATALOG', '/');
+> define('DIR_WS_HTTPS_CATALOG', '/');
+29,30c32,36
+<   // Use secure webserver for checkout procedure?
+<   // define('ENABLE_SSL', 'true');
+---
+> /**
+>  * This is the complete physical path to your store's files.  eg: /var/www/vhost/accountname/public_html/store/
+>  * Should have a closing / on it.
+>  */
+> define('DIR_FS_CATALOG', '/Applications/MAMP/htdocs/');
+32,36c38,48
+< // NOTE: be sure to leave the trailing '/' at the end of these lines if you make changes!
+< // * DIR_WS_* = Webserver directories (virtual/URL)
+<   // these paths are relative to top of your webspace ... (ie: under the public_html or httpdocs folder)
+<   define('DIR_WS_CATALOG', '/');
+<   define('DIR_WS_HTTPS_CATALOG', '/');
+---
+> /**
+>  * The following settings define your database connection.
+>  * These must be the SAME as you're using in your admin copy of configure.php
+>  */
+> define('DB_TYPE', 'mysql'); // always 'mysql'
+> define('DB_PREFIX', ''); // prefix for database table names -- preferred to be left empty
+> define('DB_CHARSET', 'utf8mb4'); // 'utf8mb4' required. If using older 'utf8' or 'latin1', convert your database to utf8mb4. See conversion util in docs site.
+> define('DB_SERVER', 'localhost');  // address of your db server
+> define('DB_SERVER_USERNAME', 'root');
+> define('DB_SERVER_PASSWORD', 'root');
+> define('DB_DATABASE', 'zencart21');
+38,48c50,54
+<
+<
+<   /*Added by jk*/
+<
+<  define('CDN_DOMAIN', 'https://securecheckorder.net/');
+<   define('FRONT_CDN', '../_CDN/');
+<   //define('CUSTOM_TEMPLATE', '../../cdn/custom_template');
+<   define('NEW_STORE_NAME', 'discountbusinesschecks.net');
+<   define('NEW_STORE_DOMAIN', $new_store_domain);
+<   define('NEW_STORE_NAME_COM', 'discountbusinesschecks.net');
+<
+---
+> /**
+>  * This is an advanced setting to determine whether you want to cache SQL queries.
+>  * Options are 'none' (which is the default) and 'file' and 'database'.
+>  */
+> define('SQL_CACHE_METHOD', 'none');
+50,54c56,59
+<   define('QS_LINK_FATHER', HTTPS_SERVER . '/checks/laser-checks?qs=');
+<   define('QS_LINK_FATHER_BLANK', HTTPS_SERVER . '/checks/blank-check-stock?qs=');
+<   define('KP_QS_LINK_FATHER', HTTPS_SERVER . '/c/laser?qs=');
+<   define('CP_QS_LINK_FATHER', HTTPS_SERVER . '/c/computer?qs=');
+<   define('URI_ONLY', $_SERVER['REQUEST_URI'] );
+---
+> /**
+>  * Reserved for future use
+>  */
+> define('SESSION_STORAGE', 'reserved for future use');
+56c61,68
+<   if (!defined('DIR_WS_INCLUDES'))  define('DIR_WS_INCLUDES', FRONT_CDN . '/includes_fe/');
+---
+> /**
+>  * Advanced use only:
+>  * The following are OPTIONAL, and should NOT be set unless you intend to change their normal use. Most sites will leave these untouched.
+>  * To use them, uncomment AND add a proper defined value to them.
+>  */
+> // define('DIR_FS_SQL_CACHE' ...
+> // define('DIR_FS_DOWNLOAD' ...
+> // define('DIR_FS_LOGS' ...
+58,116c70
+<   /*changed to central image server*/
+<   define('DIR_WS_IMAGES', 'images/');
+<
+<    define('DIR_WS_DOWNLOAD_PUBLIC', DIR_WS_CATALOG . 'pub/');
+<
+<
+<
+<
+<
+<
+< define('DIR_FS_CATALOG', '/home/securecheckorder/DOMAINS/discountbusinesschecks.net/');
+<
+< // If you want the CDN functions by default:
+< if (!defined('DIR_WS_FUNCTIONS')) define('DIR_WS_FUNCTIONS', DIR_WS_INCLUDES . 'functions/');
+< if (!defined('DIR_WS_CLASSES'))   define('DIR_WS_CLASSES',  DIR_WS_INCLUDES . 'classes/');
+<
+<
+< //dov mandel made this front end tamplate global
+<
+< define('DIR_WS_MODULES', FRONT_CDN . '/includes_fe/modules/');
+< define('DIR_WS_LANGUAGES', FRONT_CDN . '/includes_fe/languages/');
+<
+<
+<   // define('DIR_WS_PHPBB', '/');
+<
+< // * DIR_FS_* = Filesystem directories (local/physical)
+<   //the following path is a COMPLETE path to your Zen Cart files. eg: /var/www/vhost/accountname/public_html/store/
+<   //the following path is a COMPLETE path to the /logs/ folder  eg: /var/www/vhost/accountname/public_html/store/logs ... and no trailing slash
+<  // define('DIR_FS_LOGS', '/home/business/DOMAINS/discountbusinesschecks.net/logs');
+<  define('DIR_FS_LOGS', '/home/securecheckorder/DOMAINS/logs');
+<
+<   define('DIR_FS_DOWNLOAD', DIR_FS_CATALOG . 'download/');
+<   define('DIR_FS_DOWNLOAD_PUBLIC', DIR_FS_CATALOG . 'pub/');
+<   define('DIR_WS_UPLOADS', DIR_WS_IMAGES . 'uploads/');
+<   define('DIR_FS_UPLOADS', DIR_FS_CATALOG . DIR_WS_UPLOADS);
+<   define('DIR_FS_EMAIL_TEMPLATES', DIR_FS_CATALOG . 'email/');
+<
+<
+<   // define('DB_TYPE', 'mysql'); // always 'mysql'
+<   // define('DB_PREFIX', ''); // prefix for database table names -- preferred to be left empty
+<   // define('DB_CHARSET', 'utf8mb4'); // 'utf8mb4' required. If using older 'utf8' or 'latin1', convert your database to utf8mb4. See conversion util in docs site.
+<   // define('DB_SERVER', 'localhost');  // address of your db server
+<   // define('DB_SERVER_USERNAME', 'securecheckorder_my_store_user');
+<   // define('DB_SERVER_PASSWORD', '$1RM?+QI}=v]');
+<   // define('DB_DATABASE', 'securecheckorder_my_store');
+<
+<
+<
+<   // The next 2 "defines" are for SQL cache support.
+<   // For SQL_CACHE_METHOD, you can select from:  none, database, or file
+<   // If you choose "file", then you need to set the DIR_FS_SQL_CACHE to a directory where your apache
+<   // or webserver user has write privileges (chmod 666 or 777). We recommend using the "cache" folder inside the Zen Cart folder
+<   // ie: /path/to/your/webspace/public_html/zen/cache   -- leave no trailing slash
+<   define('SQL_CACHE_METHOD', 'none');
+<   define('DIR_FS_SQL_CACHE', '/home/securecheckorder/DOMAINS/discountbusinesschecks.net/cache');
+<
+<   include FRONT_CDN .'php/configure.php';
+< // EOF
+<
+---
+> // End Of File
+diff discountbusinesschecks.net/includes/counter.php ibusinesschecks.com/includes/counter.php
+3c3
+<  * counter.php — PHP 8.1 / Zen Cart 2.1 compatible
+---
+>  * counter.php
+5,8c5,9
+<  * Tracks total hits (TABLE_COUNTER) and per-day hits/sessions (TABLE_COUNTER_HISTORY).
+<  *
+<  * @package general
+<  * @license GNU GPL v2.0
+---
+>  * @copyright Copyright 2003-2022 Zen Cart Development Team
+>  * @copyright Portions Copyright 2003 osCommerce
+>  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
+>  * @version $Id: lat9 2022 May 05 Modified in v1.5.8-alpha $
+>  * @private
+10d10
+<
+14,37c14
+<
+< ////////////////////////////////////////////////////////////////////////
+< // Helper: format YYYYMMDD using a sane default long format.
+< // Falls back to raw Ymd if parsing fails.
+< ////////////////////////////////////////////////////////////////////////
+< if (!function_exists('zc_format_long_from_ymd')) {
+<   function zc_format_long_from_ymd(string $ymd): string
+<   {
+<     $dt = DateTime::createFromFormat('Ymd', $ymd);
+<     if (!$dt) return $ymd;
+<
+<     // Use a reasonable long-date fallback: "Monday 04 May, 2025"
+<     // (You can tweak to match your language pack if desired.)
+<     $fmt = 'l d F, Y';
+<     return $dt->format($fmt);
+<   }
+< }
+<
+<
+<
+< ////////////////////////////////////////////////////////////////////////
+< // Per-session flag: count a "session hit" once per PHP session
+< ////////////////////////////////////////////////////////////////////////
+< if (isset($_SESSION['session_counter']) && $_SESSION['session_counter'] === true) {
+---
+> if (isset($_SESSION['session_counter']) && $_SESSION['session_counter'] == true) {
+43,47d19
+<
+<
+< ////////////////////////////////////////////////////////////////////////
+< // Today key in YYYYMMDD
+< ////////////////////////////////////////////////////////////////////////
+49,54c21,27
+<
+< ////////////////////////////////////////////////////////////////////////
+< // TABLE_COUNTER_HISTORY: one row per day
+< // Assumes startdate is UNIQUE/PRIMARY KEY in that table.
+< // Atomic upsert: first time = (1, 1); otherwise increment counters.
+< ////////////////////////////////////////////////////////////////////////
+---
+> $counter_query = "select startdate, counter, session_counter from " . TABLE_COUNTER_HISTORY . " where startdate='" . $date_now . "'";
+> $counter = $db->Execute($counter_query);
+> $sql = "INSERT IGNORE INTO " . TABLE_COUNTER_HISTORY . " (startdate, counter, session_counter) values ('" . $date_now . "', '1', '1')";
+> $db->Execute($sql);
+> $sql = "SELECT * FROM "  . TABLE_COUNTER_HISTORY . " WHERE startdate = '" .  $date_now . "' AND counter = 1 AND session_counter = 1 LIMIT 1";
+> $result = $db->execute($sql);
+> if ($result->recordCount() <=0 || $counter->RecordCount() > 0 )
+55a29,32
+>   $counter_startdate = $counter->fields['startdate'];
+>   $counter_now = ($counter->fields['counter'] + 1);
+>   $session_counter_now = ($counter->fields['session_counter'] + $session_counter);
+>   $sql = "update " . TABLE_COUNTER_HISTORY . " set counter = '" . $counter_now . "', session_counter ='" . $session_counter_now . "' where startdate='" . $date_now . "'";
+57,79d33
+<   // Build an "INSERT ... ON DUPLICATE KEY UPDATE ..." statement using bindVars
+<   // Use two placeholders for the session increment to avoid ambiguity.
+<   $sql = "
+<     INSERT INTO counter_history (startdate, counter, session_counter)
+<     VALUES (:date:, 1, :sess1:)
+<     ON DUPLICATE KEY UPDATE
+<       counter = counter + 1,
+<       session_counter = session_counter + :sess2:
+<   ";
+<
+<   if (method_exists($db, 'bindVars')) {
+<     $sql = $db->bindVars($sql, ':date:',  $date_now, 'string');
+<     $sql = $db->bindVars($sql, ':sess1:', (int)$session_counter, 'integer');
+<     $sql = $db->bindVars($sql, ':sess2:', (int)$session_counter, 'integer');
+<
+<   } else {
+<     // Very old driver fallback (values are safe here)
+<     $sql = str_replace(
+<       [':date:', ':sess1:', ':sess2:'],
+<       [$date_now, (int)$session_counter, (int)$session_counter],
+<       $sql
+<     );
+<   }
+81,96d34
+<
+<
+<   // Fetch today's row so we can expose $counter_startdate/$counter_now like legacy code
+<   $sql = "SELECT startdate, counter, session_counter
+<             FROM counter_history
+<            WHERE startdate = :date:
+<            LIMIT 1";
+<   if (method_exists($db, 'bindVars')) {
+<     $sql = $db->bindVars($sql, ':date:', $date_now, 'string');
+<   } else {
+<     $sql = str_replace(':date:', $date_now, $sql);
+<   }
+<   $counter = $db->Execute($sql);
+<
+<   $counter_startdate = $counter->fields['startdate'] ?? $date_now;
+<   $counter_now       = isset($counter->fields['counter']) ? (int)$counter->fields['counter'] : 1;
+99,126c37,49
+< ////////////////////////////////////////////////////////////////////////
+< // TABLE_COUNTER: single running total (one-row table)
+< // If empty, insert; otherwise increment.
+< ////////////////////////////////////////////////////////////////////////
+< {
+<   $counterTotal = $db->Execute("SELECT startdate, counter FROM counter LIMIT 1");
+<   if ($counterTotal->RecordCount() <= 0) {
+<     $sql = "
+<       INSERT INTO counter (startdate, counter)
+<       VALUES (:date:, 1)
+<     ";
+<     if (method_exists($db, 'bindVars')) {
+<       $sql = $db->bindVars($sql, ':date:', $date_now, 'string');
+<     } else {
+<       $sql = str_replace(':date:', $date_now, $sql);
+<     }
+<     $db->Execute($sql);
+<
+<     $counter_startdate = $date_now; // first-ever start
+<     // $counter_now remains whatever history shows for today; total is implicitly 1 now
+<   } else {
+<     // Atomic increment; compute new value for local use
+<     $db->Execute("UPDATE counter SET counter = counter + 1");
+<     $counter_startdate = $counterTotal->fields['startdate'];
+<     // Don't requery; derive a display value if you show it somewhere
+<     $total_now = ((int)$counterTotal->fields['counter']) + 1;
+<     // (Optional) expose $total_now if your templates use it.
+<   }
+---
+> $counter_query = "select startdate, counter from " . TABLE_COUNTER;
+> $counter = $db->Execute($counter_query);
+> if ($counter->RecordCount() <= 0) {
+>   $date_now = date('Ymd');
+>   $sql = "insert into " . TABLE_COUNTER . " (startdate, counter) values ('" . $date_now . "', '1')";
+>   $db->Execute($sql);
+>   $counter_startdate = $date_now;
+>   $counter_now = 1;
+> } else {
+>   $counter_startdate = $counter->fields['startdate'];
+>   $counter_now = ($counter->fields['counter'] + 1);
+>   $sql = "update " . TABLE_COUNTER . " set counter = '" . $counter_now . "'";
+>   $db->Execute($sql);
+129,133c52
+< ////////////////////////////////////////////////////////////////////////
+< // Legacy-formatted date string (strftime deprecated on PHP 8.1)
+< // Replace usage of $counter_startdate_formatted where needed.
+< ////////////////////////////////////////////////////////////////////////
+< $counter_startdate_formatted = zc_format_long_from_ymd($counter_startdate);
+---
+> $counter_startdate_formatted = $zcDate->output(DATE_FORMAT_LONG, mktime(0, 0, 0, substr($counter_startdate, 4, 2), substr($counter_startdate, -2), substr($counter_startdate, 0, 4)));
+Only in discountbusinesschecks.net/includes: css_local
+Only in discountbusinesschecks.net/includes: custom_template
+diff discountbusinesschecks.net/includes/database_tables.php ibusinesschecks.com/includes/database_tables.php
+6,7c6
+<  * @package initSystem
+<  * @copyright Copyright 2003-2010 Zen Cart Development Team
+---
+>  * @copyright Copyright 2003-2024 Zen Cart Development Team
+10c9
+<  * @version $Id: database_tables.php 16976 2010-07-24 23:33:45Z kuroi $
+---
+>  * @version $Id: Jeff Rutt 2024 Aug 12 Modified in v2.1.0-alpha2 $
+17a17
+> define('TABLE_ADMIN_NOTIFICATIONS', DB_PREFIX . 'admin_notifications');
+22a23
+> define('TABLE_ADMIN_EXPIRED_TOKENS', DB_PREFIX . 'admin_expired_tokens');
+31a33
+> define('TABLE_COUNT_PRODUCT_VIEWS', DB_PREFIX . 'count_product_views');
+36a39
+> define('TABLE_COUPON_REFERRERS', DB_PREFIX . 'coupon_referrers');
+44a48,49
+> define('TABLE_CUSTOMER_GROUPS', DB_PREFIX . 'customer_groups');
+> define('TABLE_CUSTOMERS_TO_GROUPS', DB_PREFIX . 'customers_to_groups');
+47a53
+> define('TABLE_EZPAGES_CONTENT', DB_PREFIX . 'ezpages_content');
+48a55
+> define('TABLE_FEATURED_CATEGORIES', DB_PREFIX . 'featured_categories');
+65d71
+< define('TABLE_ORDERS_TYPE', DB_PREFIX . 'orders_type');
+70a77,80
+> define('TABLE_PLUGIN_CONTROL', DB_PREFIX . 'plugin_control');
+> define('TABLE_PLUGIN_CONTROL_VERSIONS', DB_PREFIX . 'plugin_control_versions');
+> define('TABLE_PLUGIN_GROUPS', DB_PREFIX . 'plugin_groups');
+> define('TABLE_PLUGIN_GROUPS_DESCRIPTION', DB_PREFIX . 'plugin_groups_description');
+99d108
+< define('TABLE_WISHLIST', DB_PREFIX . 'customers_wishlist');
+Only in ibusinesschecks.com/includes: defined_paths.php
+diff discountbusinesschecks.net/includes/dist-configure.php ibusinesschecks.com/includes/dist-configure.php
+3,4c3
+<  * dist-configure.php
+<  * SAMPLE (but NOT FUNCTIONAL) file
+---
+>  * dist-configure.php - SAMPLE FILE!
+6,7c5
+<  * @package Configuration Settings circa 1.5.4
+<  * @copyright Copyright 2003-2014 Zen Cart Development Team
+---
+>  * @copyright Copyright 2003-2022 Zen Cart Development Team
+10c8
+<  * @version GIT: $Id: Author: DrByte  Modified in v1.5.4 $
+---
+>  * @version $Id: DrByte 2021 Jan 23 Modified in v1.5.8-alpha $
+13a12,13
+> /*************** NOTE: This file is VERY similar to, but DIFFERENT from the "admin" version of configure.php. ***********/
+> /***************       The 2 files should be kept separate and not used to overwrite each other.              ***********/
+15,20c15,18
+< /*************** NOTE: This file is similar, but DIFFERENT from the "admin" version of configure.php. ***********/
+< /***************       The 2 files should be kept separate and not used to overwrite each other.      ***********/
+<
+< // Define the webserver and path parameters
+< // HTTP_SERVER is your Main webserver: eg-http://www.your_domain.com
+< // HTTPS_SERVER is your Secure webserver: eg-https://www.your_domain.com
+---
+> /**
+>  * Enter the domain for your store
+>  * If you have SSL, enter the correct https address in BOTH the HTTP_SERVER and HTTPS_SERVER settings, instead of just an http address.
+>  */
+24,25c22,25
+< // Use secure webserver for checkout procedure?
+< define('ENABLE_SSL', 'false');
+---
+> /**
+>  * If you have https enabled on your website, set this to 'true'
+>  */
+> define('ENABLE_SSL', 'true');
+27,29c27,31
+< // NOTE: be sure to leave the trailing '/' at the end of these lines if you make changes!
+< // * DIR_WS_* = Webserver directories (virtual/URL)
+< // these paths are relative to top of your webspace ... (ie: under the public_html or httpdocs folder)
+---
+> /**
+>  * These DIR_WS_xxxx values refer to the name of any subdirectory in which your store is located.
+>  * These values get added to the HTTP_CATALOG_SERVER and HTTPS_CATALOG_SERVER values to form the complete URLs to your storefront.
+>  * They should always start and end with a slash ... ie: '/' or '/foldername/'
+>  */
+33,40c35,39
+< define('DIR_WS_IMAGES', 'images/');
+< define('DIR_WS_INCLUDES', 'includes/');
+< define('DIR_WS_FUNCTIONS', DIR_WS_INCLUDES . 'functions/');
+< define('DIR_WS_CLASSES', DIR_WS_INCLUDES . 'classes/');
+< define('DIR_WS_MODULES', DIR_WS_INCLUDES . 'modules/');
+< define('DIR_WS_LANGUAGES', DIR_WS_INCLUDES . 'languages/');
+< define('DIR_WS_DOWNLOAD_PUBLIC', DIR_WS_CATALOG . 'pub/');
+< define('DIR_WS_TEMPLATES', DIR_WS_INCLUDES . 'templates/');
+---
+> /**
+>  * This is the complete physical path to your store's files.  eg: /var/www/vhost/accountname/public_html/store/
+>  * Should have a closing / on it.
+>  */
+> define('DIR_FS_CATALOG', '/var/www/vhost/accountname/public_html/store/');
+42,56c41,45
+< // * DIR_FS_* = Filesystem directories (local/physical)
+< //the following path is a COMPLETE path to your Zen Cart files. eg: /var/www/vhost/accountname/public_html/store/
+< define('DIR_FS_CATALOG', '/path/to/store/');
+<
+< //the following path is a COMPLETE path to the /logs/ folder  eg: /var/www/vhost/accountname/public_html/store/logs ... and no trailing slash
+< define('DIR_FS_LOGS', DIR_FS_CATALOG . '/logs');
+<
+< define('DIR_FS_DOWNLOAD', DIR_FS_CATALOG . 'download/');
+< define('DIR_FS_DOWNLOAD_PUBLIC', DIR_FS_CATALOG . 'pub/');
+< define('DIR_WS_UPLOADS', DIR_WS_IMAGES . 'uploads/');
+< define('DIR_FS_UPLOADS', DIR_FS_CATALOG . DIR_WS_UPLOADS);
+< define('DIR_FS_EMAIL_TEMPLATES', DIR_FS_CATALOG . 'email/');
+<
+< // define our database connection
+< define('DB_TYPE', 'mysql');
+---
+> /**
+>  * The following settings define your database connection.
+>  * These must be the SAME as you're using in your admin copy of configure.php
+>  */
+> define('DB_TYPE', 'mysql'); // always 'mysql'
+58,59c47,48
+< define('DB_CHARSET', 'utf8');
+< define('DB_SERVER', 'localhost');
+---
+> define('DB_CHARSET', 'utf8'); // 'utf8' or 'latin1' are most common
+> define('DB_SERVER', 'localhost');  // address of your db server
+64,68c53,56
+< // The next 2 "defines" are for SQL cache support.
+< // For SQL_CACHE_METHOD, you can select from:  none, database, or file
+< // If you choose "file", then you need to set the DIR_FS_SQL_CACHE to a directory where your apache
+< // or webserver user has write privileges (chmod 666 or 777). We recommend using the "cache" folder inside the Zen Cart folder
+< // ie: /path/to/your/webspace/public_html/zen/cache   -- leave no trailing slash
+---
+> /**
+>  * This is an advanced setting to determine whether you want to cache SQL queries.
+>  * Options are 'none' (which is the default) and 'file' and 'database'.
+>  */
+70d57
+< define('DIR_FS_SQL_CACHE', '/enter/your/path/to/public_html_or_htdocs/and/zencart/here/zen/cache');
+72c59,73
+< // EOF
+---
+> /**
+>  * Reserved for future use
+>  */
+> define('SESSION_STORAGE', 'temporary value added by zc_install');
+>
+> /**
+>  * Advanced use only:
+>  * The following are OPTIONAL, and should NOT be set unless you intend to change their normal use. Most sites will leave these untouched.
+>  * To use them, uncomment AND add a proper defined value to them.
+>  */
+> // define('DIR_FS_SQL_CACHE' ...
+> // define('DIR_FS_DOWNLOAD' ...
+> // define('DIR_FS_LOGS' ...
+>
+> // End Of File
+Common subdirectories: discountbusinesschecks.net/includes/extra_cart_actions and ibusinesschecks.com/includes/extra_cart_actions
+Common subdirectories: discountbusinesschecks.net/includes/extra_configures and ibusinesschecks.com/includes/extra_configures
+Common subdirectories: discountbusinesschecks.net/includes/extra_datafiles and ibusinesschecks.com/includes/extra_datafiles
+Only in discountbusinesschecks.net/includes: favicon.ico
+diff discountbusinesschecks.net/includes/filenames.php ibusinesschecks.com/includes/filenames.php
+6,7c6
+<  * @package general
+<  * @copyright Copyright 2003-2011 Zen Cart Development Team
+---
+>  * @copyright Copyright 2003-2024 Zen Cart Development Team
+10,11c9
+<  * @version $Id: filenames.php 19690 2011-10-04 16:41:45Z drbyte $
+<  * @private
+---
+>  * @version $Id: Jeff Rutt 2024 Aug 12 Modified in v2.1.0-alpha2 $
+15a14,15
+> define('FILENAME_ABOUT_US', 'about_us');
+> define('FILENAME_ACCESSIBILITY', 'accessibility');
+17d16
+< define('FILENAME_ACCOUNT_PAYMENT', 'account_payment');
+29,30c28,30
+< define('FILENAME_ADVANCED_SEARCH', 'advanced_search');
+< define('FILENAME_ADVANCED_SEARCH_RESULT', 'advanced_search_result');
+---
+> define('FILENAME_ADVANCED_SEARCH', 'search'); // alias since 1.5.8; to be removed later
+> define('FILENAME_ADVANCED_SEARCH_RESULT', 'search_result'); // alias since 1.5.8; to be removed later
+> define('FILENAME_AJAX', 'ajax');
+32a33
+> define('FILENAME_ASK_A_QUESTION', 'ask_a_question');
+35d35
+< define('FILENAME_BACKUP', 'backup');
+38c38
+< define('FILENAME_CACHE', 'cache');
+---
+> define('FILENAME_BRANDS', 'brands');
+41a42
+> define('FILENAME_CATEGORY_PRODUCT_LISTING', 'category_product_listing');
+54a56
+> define('FILENAME_COUPON_REFERRERS', 'coupon_referrers');
+55a58
+> define('FILENAME_COUPON_ADMIN_EXPORT', 'coupon_admin_export');
+59a63
+> define('FILENAME_CUSTOMER_GROUPS', 'customer_groups');
+60a65,67
+> define('FILENAME_DEFINE_ABOUT_US', 'define_about_us');
+> define('FILENAME_DEFINE_ACCESSIBILITY', 'define_accessibility');
+> define('FILENAME_DEFINE_ASK_A_QUESTION', 'define_ask_a_question');
+72a80
+> define('FILENAME_DEFINE_SHOPPING_CART', 'define_shopping_cart');
+74d81
+< define('FILENAME_DEFINE_LANGUAGE', 'define_language');
+92a100
+> define('FILENAME_FEATURED_CATEGORIES','featured_categories');
+100a109,110
+> define('FILENAME_MFA', 'mfa');
+> define('FILENAME_META_TAGS', 'meta_tags');
+106c116,117
+< define('FILENAME_ORDERS_STATUS', 'orders_status');define('FILENAME_ORDER_STATUS', 'order_status');
+---
+> define('FILENAME_ORDERS_STATUS', 'orders_status');
+> define('FILENAME_ORDER_STATUS', 'order_status');
+113d123
+< define('FILENAME_PAYER_AUTH_START', 'payer_auth_start');
+118a129
+> define('FILENAME_PLUGIN_MANAGER', 'plugin_manager');
+147a159,160
+> define('FILENAME_SEARCH', 'search');
+> define('FILENAME_SEARCH_RESULT', 'search_result');
+150d162
+< define('FILENAME_SHIPPING_MODULES', 'shipping_modules');
+160a173
+> define('FILENAME_STATS_SALES_REPORT_GRAPHS', 'stats_sales_report_graphs');
+178a192
+> define('FILENAME_FEATURED_CATEGORIES_MODULE','featured_categories.php');
+188d201
+< define('FILENAME_PRODUCTS_DISCOUNT_PRICES','products_discount_prices.php');
+192d204
+< define('FILENAME_BB_INDEX', 'index.php'); // phpBB main index filename
+diff discountbusinesschecks.net/includes/form_check.js.php ibusinesschecks.com/includes/form_check.js.php
+5,6c5
+<  * @package page
+<  * @copyright Copyright 2003-2010 Zen Cart Development Team
+---
+>  * @copyright Copyright 2003-2022 Zen Cart Development Team
+9c8
+<  * @version $Id: form_check.js.php 17018 2010-07-27 07:25:41Z drbyte $
+---
+>  * @version $Id: torvista 2022 Feb 18 Modified in v1.5.8-alpha $
+12c11
+< <script language="javascript" type="text/javascript"><!--
+---
+> <script>
+178c177
+< //--></script>
+---
+> </script>
+Common subdirectories: discountbusinesschecks.net/includes/functions and ibusinesschecks.com/includes/functions
+Common subdirectories: discountbusinesschecks.net/includes/index_filters and ibusinesschecks.com/includes/index_filters
+Common subdirectories: discountbusinesschecks.net/includes/init_includes and ibusinesschecks.com/includes/init_includes
+Only in discountbusinesschecks.net/includes: initsystem.php
+Only in ibusinesschecks.com/includes: languages
+Only in discountbusinesschecks.net/includes: languages(used the fe cdn)
+diff discountbusinesschecks.net/includes/main_cart_actions.php ibusinesschecks.com/includes/main_cart_actions.php
+2,4c2,88
+< // Include the PHP file
+< include FRONT_CDN . 'includes_fe/main_cart_actions.php';
+< ?>
+\ No newline at end of file
+---
+> /**
+>  * Main Shopping Cart actions supported.
+>  *
+>  * The main cart actions supported by the shopping_cart class.
+>  * This can be added to externally using the extra_cart_actions directory.
+>  *
+>  * @copyright Copyright 2003-2024 Zen Cart Development Team
+>  * @copyright Portions Copyright 2003 osCommerce
+>  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
+>  * @version $Id: lat9 2024 Oct 17 Modified in v2.1.0 $
+>  */
+> use Zencart\FileSystem\FileSystem;
+>
+> if (!defined('IS_ADMIN_FLAG')) {
+>     die('Illegal Access');
+> }
+>
+> /**
+>  * NOTE: the $goto and $parameters variables are set by init_cart_handler.php
+>  */
+>
+> /**
+>  * Load all PHP files present in the extra_cart_actions subdirectory.
+>  */
+> $baseDir = DIR_FS_CATALOG . DIR_WS_INCLUDES . 'extra_cart_actions/';
+> $mca_filesystem = new FileSystem();
+> $files = $mca_filesystem->listFilesFromDirectoryAlphaSorted($baseDir);
+> foreach ($files as $file) {
+>     require $baseDir . $file;
+> }
+>
+> /**
+>  * Load all PHP files present in enabled zc_plugins' extra_cart_actions subdirectories.
+>  */
+> foreach ($installedPlugins as $plugin) {
+>     $pluginDir = DIR_FS_CATALOG . 'zc_plugins/' . $plugin['unique_key'] . '/' . $plugin['version'] . '/catalog/includes/extra_cart_actions/';
+>     $files = $mca_filesystem->listFilesFromDirectoryAlphaSorted($pluginDir);
+>     foreach ($files as $file) {
+>         require $pluginDir . $file;
+>     }
+> }
+>
+> switch ($_GET['action']) {
+>     /**
+>      * customer wants to update the product quantity in their shopping cart
+>      * delete checkbox or 0 quantity removes from cart
+>      */
+>     case 'update_product' :
+>         $_SESSION['cart']->actionUpdateProduct($goto, $parameters);
+>         break;
+>     /**
+>      * customer adds a product from the products page
+>      */
+>     case 'add_product' :
+>         $_SESSION['cart']->actionAddProduct($goto, $parameters);
+>         break;
+>     case 'buy_now' :
+>         /**
+>          * performed by the 'buy now' button in product listings and review page
+>          */
+>         $_SESSION['cart']->actionBuyNow($goto, $parameters);
+>         break;
+>     case 'multiple_products_add_product' :
+>         /**
+>          * performed by the multiple-add-products button
+>          */
+>         $_SESSION['cart']->actionMultipleAddProduct($goto, $parameters);
+>         break;
+>     case 'notify' :
+>         $_SESSION['cart']->actionNotify($goto, $parameters);
+>         break;
+>     case 'notify_remove' :
+>         $_SESSION['cart']->actionNotifyRemove($goto, $parameters);
+>         break;
+>     case 'cust_order' :
+>         $_SESSION['cart']->actionCustomerOrder($goto, $parameters);
+>         break;
+>     case 'remove_product' :
+>         $_SESSION['cart']->actionRemoveProduct($goto, $parameters);
+>         break;
+>     case 'cart' :
+>         $_SESSION['cart']->actionCartUserAction($goto, $parameters);
+>         break;
+>     case 'empty_cart' :
+>         $_SESSION['cart']->reset(true);
+>         break;
+> }
+Only in ibusinesschecks.com/includes: modules
+Only in discountbusinesschecks.net/includes: modules(used the fe cdn)
+Only in ibusinesschecks.com/includes: psr4Autoload.php
+diff discountbusinesschecks.net/includes/spiders.txt ibusinesschecks.com/includes/spiders.txt
+1c1
+< $Id: spiders.txt 2014-06-17 drbyte $
+---
+> $Id: spiders.txt 2019-10-31 Shrimp-Gumbo $
+3c3
+< robot
+---
+> collect
+5,8c5,11
+< scrape
+< seek.
+< seeker
+< slurp
+---
+> fetch
+> grab
+> libwww
+> link
+> robo
+> search
+> seek
+10c13
+< msnbot
+---
+> walk
+12d14
+< acme
+13a16
+> acme
+14a18
+> admantx
+16a21
+> ahrefs
+18a24,25
+> aliapp
+> alibaba
+22,23d28
+< amfibibot
+< amishbot
+32d36
+< araybot
+37a42
+> asaha
+40,42d44
+< asaha
+< aspider
+< aspseek
+51,52d52
+< baiduspider
+< bannana_bot
+54,57d53
+< bbot
+< bdcindexer
+< bdfetch
+< becomebot
+70,72d65
+< borg-bot
+< botlink
+< boxseabot
+74,76d66
+< bruinbot
+< bspider
+< cactvs chemistry spider
+79c69
+< cfetch
+---
+> cf-uc
+82d71
+< checkbot
+85d73
+< christcrawler
+89d76
+< clushbot
+91d77
+< collective
+95,97d80
+< confuzzledbot
+< converacrawler
+< coolbot
+103,104c86,87
+< cydralspider
+< dataparksearch
+---
+> datanyse
+> datanyze
+106d88
+< dienstspider
+109,110c91
+< digital integrity robot
+< direct hit grabber
+---
+> dispatch
+114d94
+< dnabot
+117d96
+< dragonbot
+121d99
+< dumbot
+124,126d101
+< ecollector
+< eit link verifier robot
+< elfinbot
+128d102
+< emailcollector
+129a104
+> envolk
+131,133d105
+< exabot
+< extractor
+< e-societyrobot
+135c107
+< falcon
+---
+> extractor
+137c109
+< fast enterprise crawler
+---
+> falcon
+139,142c111
+< fastcrawler
+< fast-webcrawler
+< feedfetcher
+< fetchrover
+---
+> feedly
+144,145d112
+< findlinks
+< fish search
+147,149d113
+< fluffy the spider
+< fluid dynamics search engine robot
+< focusedcrawler
+151,152c115
+< freecrawl
+< frooglebot
+---
+> frd-a100
+154,157d116
+< fusionbot
+< fyberspider
+< gaisbot
+< gammaspider
+161,166d119
+< geobot
+< geonabot
+< getbot
+< getterroboplus
+< gigabot
+< girafabot
+177,178d129
+< gulperbot
+< hambot
+181a133
+> headless
+186d137
+< henrythemiragorobot
+192d142
+< iajabot
+200d149
+< inelabot
+202,203d150
+< infoseek
+< infospiders
+206,209d152
+< inktomisearch
+< inspectorbot
+< intelliagentbot
+< internet cruiser robot
+212,214d154
+< internetlinkagent
+< irlbot
+< irobot
+216d155
+< israeli-search
+220,222c159
+< javabee
+< jbot java web robot
+< jcrawler
+---
+> java
+225,227d161
+< jobot
+< joebot
+< jubii indexing robot
+233d166
+< ko_yappo_robot
+236d168
+< labelgrabber
+239,248c171
+< libwww-mget
+< libwww-perl
+< limebot
+< linkchecker
+< link validator
+< linklint-checkonly
+< linknzbot
+< linkscan
+< linkwalker
+< lnspiderguy
+---
+> liebaofast
+249a173
+> ltx71
+251d174
+< lycos_spider
+252a176
+> mail.ru
+255,256d178
+< mail.ru
+< mattiebot
+258a181
+> mega
+262d184
+< metagerbot
+265,266d186
+< url control
+< mindcrawler
+269,270c189
+< mj12bot
+< mnogosearch
+---
+> mixnodecache
+272,274d190
+< momspider
+< monsterbot
+< msiecrawler
+276d191
+< muncher bot
+279d193
+< mysterybot
+281d194
+< nationaldirectory
+282a196
+> nationaldirectory
+285,288d198
+< naverbot
+< naverbot_dloader
+< naverrobot
+< ndspider
+296,297d205
+< netnosecrawler
+< netresearchserver
+298a207
+> netseer
+300,301c209
+< nextgensearchbot
+< ng-search
+---
+> nodeping
+304d211
+< npbot
+306d212
+< nusearch
+308d213
+< nwi robot
+311,312d215
+< objectssearch
+< obot
+317,319d219
+< online link
+< ontospider
+< openbot
+321c221
+< orb search
+---
+> oppo
+331,332d230
+< patwebbot
+< peerbot
+335d232
+< perlcrawler
+345d241
+< polybot
+347,350d242
+< poppelsdorf
+< psycheclone
+< publisher
+< python
+351a244
+> poppelsdorf
+354d246
+< portal juice spider
+356,358c248,251
+< portalb spider
+< psbot
+< python robot
+---
+> proximic
+> psycheclone
+> publisher
+> python
+360a254
+> qwantify
+362,363d255
+< raven search
+< rbse spider
+365d256
+< resume robot
+367d257
+< rixbot
+369,377d258
+< roadhouse crawling system
+< robbie the robot
+< robocrawl spider
+< robofox
+< robopal
+< robot
+< robot francoroute
+< robozilla
+< roverbot
+378a260
+> ruby
+380d261
+< safetynet robot
+382a264
+> scirus
+384a267,268
+> scrape
+> scrapy
+387,389d270
+< search agent
+< search.aus-au.com
+< searchprocess
+394d274
+< seosearch
+396d275
+< shagseeker
+406d284
+< slider.com
+408d285
+< slcrawler
+410c287,288
+< smart spider
+---
+> slider.com
+> slurp
+412a291
+> sogou
+414d292
+< solbot
+419,420d296
+< spry wizard robot
+< spurlbot
+433,434d308
+< tarspider
+< techbot
+438d311
+< thesubot
+443d315
+< tlspider
+447,448d318
+< turnitinbot
+< tutorgigbot
+451,454d320
+< ucsd crawl
+< udmsearch
+< ultraseek
+< unchaos_crawler
+456c322
+< uptimebot
+---
+> url control
+458d323
+< usyd-nlp-spider
+463,466d327
+< verticrawl
+< vision-search
+< void-bot
+< voilabot
+469,470d329
+< vspider
+< vwbot
+474a334,335
+> web hoper
+> web hopper
+480d340
+< webfetcher
+482,484d341
+< web hoper
+< web hopper
+< web-sniffer
+487d343
+< webinator-indexer
+489d344
+< weblinker
+498d352
+< websearch
+500c354
+< webspider
+---
+> web-sniffer
+503,504d356
+< webwalk
+< webwalker
+506d357
+< webyield robot
+510d360
+< whatuseek
+526,530c376,377
+< yacybot
+< yahoo! slurp
+< yahoocache
+< yahoo-mmcrawler
+< yahooseeker
+---
+> y!j-asr
+> yahoo
+535d381
+< yottacars_bot
+537d382
+< zao-crawler
+539,540d383
+< zipppbot
+< zoomspider
+Common subdirectories: discountbusinesschecks.net/includes/templates and ibusinesschecks.com/includes/templates
+diff discountbusinesschecks.net/includes/version.php ibusinesschecks.com/includes/version.php
+10,11c10
+<  * @package general
+<  * @copyright Copyright 2003-2014 Zen Cart Development Team
+---
+>  * @copyright Copyright 2003-2024 Zen Cart Development Team
+13c12
+<  * @version GIT: $Id: Author: DrByte Dec 12 2014  Modified in v1.5.4 $
+---
+>  * @version $Id: Scott Wilson 2024 Nov 23 Modified in v2.1.0 $
+18,19c17,18
+< define('PROJECT_VERSION_MAJOR', '1');
+< define('PROJECT_VERSION_MINOR', '5.4');
+---
+> define('PROJECT_VERSION_MAJOR', '2');
+> define('PROJECT_VERSION_MINOR', '1.0');
+24,26c23,28
+< define('NEW_VERSION_CHECKUP_URL','http://ping.zen-cart.com/version_id.txt');
+< define('EXPECTED_DATABASE_VERSION_MAJOR', '1');
+< define('EXPECTED_DATABASE_VERSION_MINOR', '5.4');
+---
+> define('NEW_VERSION_CHECKUP_URL','https://ping.zen-cart.com/version_id.txt');
+> define('PROJECT_VERSIONSERVER_URL', 'https://ping.zen-cart.com/zcversioncheck');
+> define('PLUGIN_VERSIONSERVER_URL', 'https://ping.zen-cart.com/plugincheck');
+> define('PROJECT_NOTIFICATIONSERVER_URL', 'https://ping.zen-cart.com/api/notifications');
+> define('EXPECTED_DATABASE_VERSION_MAJOR', '2');
+> define('EXPECTED_DATABASE_VERSION_MINOR', '1.0');
+piotrszulc@MacBook-Pro-Piotr frontend %

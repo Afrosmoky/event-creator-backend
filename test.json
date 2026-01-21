@@ -1,0 +1,26 @@
+[
+{
+    name: 'main table',
+    id: '???',
+
+    x: 1.444, // double
+    y: 1.444, // double
+    color: '#000000', // 7 chars string
+
+    kind: 'table', // 'table' | 'icon' | 'chairs', etc.
+
+    seats: 13, // if kind has seats
+    spacing: 0.6, // ^ same
+
+    angle: 14.4, // rotation. actually, it is not present for the round table
+    angleOriginX: 14.4,
+    angleOriginY: 14.4,
+
+    config: {} // kind-dependent
+    }
+]
+
+{ type: 'round', radius: 16.6 } | { type: 'rectangular', width: 14.4, height: 14.4 } // for kind: 'table'
+{ width: 17.7 } // for kind: 'chairs'
+{ size: 12.2 } // for kind: 'icon'
+{ stage: [ { ... }, ... ], guests: [ { ... }, ... ] }
