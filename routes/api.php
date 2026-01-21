@@ -5,6 +5,7 @@ use App\Http\Controllers\API\ElementController;
 use App\Http\Controllers\API\GuestController;
 use App\Http\Controllers\API\GuestNoteController;
 use App\Http\Controllers\API\RegisterController;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(RegisterController::class)->group(function(){
