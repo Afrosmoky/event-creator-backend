@@ -108,6 +108,26 @@ class GuestController extends Controller
      */
     public function export($ballroomId): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
-        return Excel::download(new GuestExport($ballroomId), 'guests.xlsx');
+        $response = Http::withToken(config('services.emka.token'))
+            ->get(config('services.emka.api_url') . "/$ballroomId/guests");
+
+        $guests = collect($response->json())
+            ->map(fn ($item) => GuestHelper::mapExternalGuest($item, $ballroomId))
+            ->values();
+
+        $guestIds = $guests->pluck('guest_id')->all();
+
+        $notesByGuestId = GuestNote::whereIn('guest_id', $guestIds)
+            ->pluck('note', 'guest_id');
+
+        $guests = $guests->map(function (array $guest) use ($notesByGuestId) {
+            $guest['note'] = $notesByGuestId[$guest['guest_id']] ?? null;
+            return $guest;
+        });
+
+        return Excel::download(
+            new GuestExport($ballroomId, $guests),
+            'guests.xlsx'
+        );
     }
 }
