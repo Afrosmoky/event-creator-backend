@@ -38,7 +38,14 @@ class ElementConfig extends Model
         'bottom_height',
         'top_height',
         'bottom_width',
-        'show_unseated'
+        'show_unseated',
+        'border_color',
+        'border_width',
+        'name_color',
+        'name_font_size',
+        'name_bold',
+        'name_italic',
+        'seat_facing',
     ];
 
     /**

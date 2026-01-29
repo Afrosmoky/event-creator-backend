@@ -4,9 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Element extends Model
 {
@@ -49,6 +48,11 @@ class Element extends Model
     public function config(): HasOne
     {
         return $this->HasOne(ElementConfig::class);
+    }
+
+    public function seats(): HasMany
+    {
+        return $this->hasMany(Seat::class);
     }
 }
 

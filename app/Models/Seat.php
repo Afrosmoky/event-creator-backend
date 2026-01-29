@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Seat extends Model
 {
@@ -20,8 +20,8 @@ class Seat extends Model
 
     protected $table = 'seats';
 
-    public function elements(): HasMany
+    public function element(): BelongsTo
     {
-        return $this->hasMany(Element::class);
+        return $this->belongsTo(Element::class);
     }
 }

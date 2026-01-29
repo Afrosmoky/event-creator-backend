@@ -29,6 +29,13 @@ class ElementConfigResource extends JsonResource
             'top_height' => $this->top_height,
             'bottom_width' => $this->bottom_width,
             'show_unseated' => $this->show_unseated,
+            'border_color'  => $this->border_color,
+            'border_width' => $this->border_width,
+            'name_color' => $this->name_color,
+            'name_font_size' => $this->name_font_size,
+            'name_bold' => $this->name_bold,
+            'name_italic' => $this->name_italic,
+            'seat_facing' => $this->seat_facing,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s')
         ];

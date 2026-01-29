@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 class GuestExport implements FromCollection, WithHeadings
 {
     public function __construct(
-        private int $ballroomId,
+        private string $ballroomId,
         private \Illuminate\Support\Collection $guests
     ) {}
 
@@ -36,7 +36,7 @@ class GuestExport implements FromCollection, WithHeadings
                     'Guest Menu'       => $guest['menu'] ?? null,
                     'Guest Group'      => $guest['group'] ?? null,
                     'Guest Note'       => $guest['note'] ?? null,
-                    'Table'            => $seat->element->name,
+                    'Table'            => $seat->element?->name,
                     'Seat No'          => $seat->index,
                     'Seat Label'       => $seat->label,
                 ];
