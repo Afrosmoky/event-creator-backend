@@ -13,47 +13,76 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('elements', function (Blueprint $table) {
-            $table->uuid('id')->primary()->unique();
-            $table->string('name');
-            $table->string('type');
-            $table->integer('ballroom_id')->index();
-            $table->integer('parent_id')->index();
-            $table->integer('x');
-            $table->integer('y');
+            $table->id();
+
+            $table->uuid('public_id')->default(DB::raw('gen_random_uuid()'))->unique();
+
+            $table->string('name')->nullable();
+            $table->string('type')->nullable();
+
+            $table->string('index')->nullable();   // legacy / frontend
+            $table->string('focus')->nullable();   // legacy / frontend
+            $table->string('icon')->nullable();
+
+            $table->integer('parent_id')->nullable()->index();
+
+            $table->double('x');
+            $table->double('y');
+
             $table->string('color')->nullable();
             $table->string('kind');
             $table->double('spacing');
             $table->string('status');
+
+            $table->integer('width')->nullable()->default(0);
+            $table->integer('height')->nullable()->default(0);
+            $table->integer('angle')->nullable()->default(0);
+
+            $table->uuid('ballroom_id')->nullable()->index();
+
+            $table->jsonb('jsonb')->nullable();
+
             $table->timestamps();
         });
 
         Schema::create('element_configs', function (Blueprint $table) {
-            $table->uuid('id')->primary()->unique();
-            $table->foreignIdFor(Element::class)
-                ->constrained()
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
-            $table->string('type');
-            $table->string('seats');
-            $table->string('radius');
-            $table->double('width');
-            $table->double('height');
-            $table->double('size');
-            $table->double('angle');
-            $table->double('angle_origin_x');
-            $table->double('angle_origin_y');
-            $table->timestamps();
-        });
+            $table->id();
 
-        Schema::create('guests', function (Blueprint $table) {
-            $table->uuid('id')->primary()->unique();
-            $table->string('guest_id');
-            $table->foreignIdFor(Element::class)
-                ->constrained()
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
-            $table->integer('ballroom_id')->index();
-            $table->jsonb('parameters')->nullable();
+            $table->foreignId('element_id')
+                ->nullable()
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->string('seats')->nullable();
+            $table->string('radius')->nullable();
+
+            $table->double('width')->nullable();
+            $table->double('height')->nullable();
+            $table->double('size')->nullable();
+
+            $table->double('angle')->nullable();
+            $table->double('angle_origin_x')->nullable();
+            $table->double('angle_origin_y')->nullable();
+
+            $table->integer('arms_width')->nullable();
+            $table->integer('bottom_height')->nullable();
+            $table->integer('top_height')->nullable();
+            $table->integer('bottom_width')->nullable();
+
+            $table->boolean('show_unseated')->default(false);
+
+            $table->string('border_color')->nullable();
+            $table->integer('border_width')->nullable();
+
+            $table->string('name_color')->nullable();
+            $table->integer('name_font_size')->nullable();
+            $table->boolean('name_bold')->nullable();
+            $table->boolean('name_italic')->nullable();
+
+            $table->integer('seat_facing')->nullable();
+
+            $table->timestamps();
         });
     }
 
@@ -64,6 +93,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('elements');
         Schema::dropIfExists('element_configs');
-        Schema::dropIfExists('guests');
     }
 };

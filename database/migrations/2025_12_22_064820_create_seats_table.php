@@ -14,18 +14,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('seats', function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(Element::class)
-                ->constrained()
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
-            $table->foreignIdFor(Guest::class)
-                ->constrained()
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
+            $table->bigIncrements('id');
+
+            $table->unsignedBigInteger('element_id');
+            $table->foreign('element_id')->references('id')->on('elements')->cascadeOnDelete();
+
             $table->integer('index');
             $table->string('label')->nullable();
-            $table->integer('ballroom_id')->index();
+
+            $table->uuid('guest_id')->nullable()->index();
+            $table->uuid('ballroom_id')->nullable()->index();
+
             $table->timestamps();
         });
     }

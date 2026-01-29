@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('guest_notes', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('guest_id');
-            $table->text('note')->nullable();
-            $table->timestamps();
+            $table->bigIncrements('id');
 
-            $table->unique('guest_id');
+            $table->uuid('guest_id')->unique();
+            $table->text('note')->nullable();
+
+            $table->timestamps();
         });
     }
 
