@@ -23,7 +23,7 @@ class ElementController extends Controller
 
     private SeatRepositoryInterface $seatRepositoryInterface;
 
-    public function __construct(ElementRepositoryInterface $elementRepositoryInterface, ElementConfigRepositoryInterface $elementConfigRepositoryInterface, GuestRepositoryInterface $guestRepositoryInterface, ElementTypeRepository $elementTypeRepository, SeatRepositoryInterface $seatRepositoryInterface)
+    public function __construct(ElementRepositoryInterface $elementRepositoryInterface, ElementConfigRepositoryInterface $elementConfigRepositoryInterface, SeatRepositoryInterface $seatRepositoryInterface)
     {
         $this->elementRepositoryInterface = $elementRepositoryInterface;
         $this->elementConfigRepositoryInterface = $elementConfigRepositoryInterface;
