@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\BallroomConfigController;
 use App\Http\Controllers\API\BallroomController;
 use App\Http\Controllers\API\ElementController;
 use App\Http\Controllers\API\GuestController;
@@ -24,6 +25,16 @@ Route::delete('seat/{seatId}', [ElementController::class, 'releaseSeat']);
 Route::post('/guest-notes', [GuestNoteController::class, 'store']);
 Route::put('/guest-notes/{guest_id}', [GuestNoteController::class, 'update']);
 Route::get('guest/export/{ballroom_id}', [GuestController::class, 'export']);
+
+Route::get(
+    'ballrooms/{ballroom}/config',
+    [BallroomConfigController::class, 'show']
+);
+
+Route::put(
+    'ballrooms/{ballroom}/config',
+    [BallroomConfigController::class, 'update']
+);
 
 //Maybe will be used in future
 Route::get('ballroom/getElements/{ballroom_id}', [BallroomController::class, 'getBallroom']);
