@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\BallroomConfigController;
+use App\Http\Controllers\API\BallroomConfigController;
 use App\Http\Controllers\API\BallroomController;
 use App\Http\Controllers\API\ElementController;
 use App\Http\Controllers\API\GuestController;
